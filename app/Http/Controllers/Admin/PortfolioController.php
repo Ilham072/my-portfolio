@@ -3,63 +3,64 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Admin\PortfolioStoreRequest;
+use App\Http\Requests\Admin\PortfolioUpdateRequest;
+use App\Models\Portfolio;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class PortfolioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $items = Portfolio::query()
+            ->select(['id','title','slug','featured','sort_order','published_at','created_at'])
+            ->orderBy('sort_order')
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('admin/Portfolio/Index', [
+            'items' => $items,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return Inertia::render('admin/Portfolio/Create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(PortfolioStoreRequest $request)
     {
-        //
+        $data = $request->validated();
+        $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+
+        Portfolio::create($data);
+
+        return redirect()->route('admin.portfolios.index')->with('success', 'Project created.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Portfolio $portfolio)
     {
-        //
+        return Inertia::render('admin/Portfolio/Edit', [
+            'item' => $portfolio,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(PortfolioUpdateRequest $request, Portfolio $portfolio)
     {
-        //
+        $data = $request->validated();
+        $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+
+        $portfolio->update($data);
+
+        return redirect()->route('admin.portfolios.index')->with('success', 'Project updated.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Portfolio $portfolio)
     {
-        //
-    }
+        $portfolio->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('admin.portfolios.index')->with('success', 'Project deleted.');
     }
 }

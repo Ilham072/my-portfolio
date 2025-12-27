@@ -4,22 +4,27 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('experiences', function (Blueprint $table) {
             $table->id();
+
+            $table->string('company');
+            $table->string('role');
+            $table->string('location')->nullable();
+
+            $table->date('start_date');
+            $table->date('end_date')->nullable();
+            $table->boolean('is_current')->default(false)->index();
+
+            $table->longText('description')->nullable();
+
+            $table->unsignedInteger('sort_order')->default(0)->index();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('experiences');
