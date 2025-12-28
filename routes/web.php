@@ -22,4 +22,15 @@ Route::get('/blog/{article:slug}', [BlogController::class, 'show'])->name('publi
 Route::get('/contact', [ContactController::class, 'index'])->name('public.contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('public.contact.store');
 
+Route::get('/dashboard', function () {
+    $user = request()->user();
+
+    if ($user && $user->is_admin) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    return redirect()->route('public.home');
+})->middleware('auth')->name('dashboard');
+
+
 require __DIR__ . '/auth.php';
