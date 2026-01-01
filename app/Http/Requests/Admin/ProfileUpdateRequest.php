@@ -21,10 +21,11 @@ class ProfileUpdateRequest extends FormRequest
             'website_url' => ['nullable','url','max:255'],
             'avatar_path' => ['nullable','string','max:255'],
 
-            'social_links' => ['nullable','array'],
+            'social_links' => ['sometimes','nullable','array'],
             'social_links.github' => ['nullable','url','max:255'],
             'social_links.linkedin' => ['nullable','url','max:255'],
             'social_links.twitter' => ['nullable','url','max:255'],
         ];
     }
+
 }

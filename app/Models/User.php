@@ -23,6 +23,7 @@ class User extends Authenticatable
         'avatar_path',
     ];
 
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -30,6 +31,8 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+
         'is_admin' => 'boolean',
         'social_links' => 'array',
     ];
