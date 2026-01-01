@@ -27,8 +27,8 @@ class Portfolio extends Model
         'published_at' => 'datetime',
     ];
 
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
+    // public function getRouteKeyName(): string
+    // {
+    //     return 'slug';
+    // }
 }

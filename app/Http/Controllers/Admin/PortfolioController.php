@@ -33,7 +33,9 @@ class PortfolioController extends Controller
     public function store(PortfolioStoreRequest $request)
     {
         $data = $request->validated();
-        $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+
+        $data['slug'] = Str::slug(trim($data['slug'] ?? '') ?: $data['title']);
+        $data['featured'] = (bool) ($data['featured'] ?? false);
 
         Portfolio::create($data);
 
@@ -50,7 +52,9 @@ class PortfolioController extends Controller
     public function update(PortfolioUpdateRequest $request, Portfolio $portfolio)
     {
         $data = $request->validated();
-        $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+
+        $data['slug'] = Str::slug(trim($data['slug'] ?? '') ?: $data['title']);
+        $data['featured'] = (bool) ($data['featured'] ?? false);
 
         $portfolio->update($data);
 

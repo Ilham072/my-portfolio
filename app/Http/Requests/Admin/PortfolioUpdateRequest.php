@@ -29,7 +29,7 @@ class PortfolioUpdateRequest extends FormRequest
             'tech_stack' => ['nullable','array'],
             'tech_stack.*' => ['string','max:64'],
 
-            'featured' => ['boolean'],
+            'featured' => ['sometimes', 'boolean'],
             'sort_order' => ['nullable','integer','min:0','max:1000000'],
             'published_at' => ['nullable','date'],
         ];

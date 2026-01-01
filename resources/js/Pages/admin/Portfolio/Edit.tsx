@@ -18,10 +18,10 @@ type FormData = {
   cover_image_path: string;
   project_url: string;
   repository_url: string;
-  tech_stack: string;
+  tech_stack: string;   // UI string
   featured: boolean;
   sort_order: number;
-  published_at: string;
+  published_at: string; // ISO string atau "" di form
 };
 
 export default function Edit({ item }: Props) {
@@ -51,24 +51,35 @@ export default function Edit({ item }: Props) {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     submitValidated(() => {
       const tech = form.data.tech_stack
         .split(",")
         .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+        .filter(Boolean);
+
+      form.transform((data) => ({
+        ...data,
+        tech_stack: tech,
+        sort_order: Number(data.sort_order || 0),
+        featured: Boolean(data.featured),
+        published_at: data.published_at ? data.published_at : null,
+      }));
 
       form.put(`/admin/portfolios/${item.id}`, {
         preserveScroll: true,
-        transform: (data) => ({
-          ...data,
-          tech_stack: tech,
-          sort_order: Number(data.sort_order || 0),
-          featured: Boolean(data.featured),
-          published_at: data.published_at ? new Date(data.published_at).toISOString() : null,
-        }),
+        onFinish: () => {
+          // optional: reset transform supaya tidak “nempel”
+          form.transform((d) => d);
+        },
       });
     });
   };
+
+  const togglePublished = (checked: boolean) => {
+    form.setData("published_at", checked ? new Date().toISOString() : "");
+  };
+
 
   return (
     <AdminLayout>
@@ -86,6 +97,37 @@ export default function Edit({ item }: Props) {
           <Input label="Project URL" value={form.data.project_url} onChange={(e) => form.setData("project_url", e.target.value)} />
           <Input label="Repository URL" value={form.data.repository_url} onChange={(e) => form.setData("repository_url", e.target.value)} />
           <Input label="Tech Stack (comma separated)" value={form.data.tech_stack} onChange={(e) => form.setData("tech_stack", e.target.value)} />
+          <div className="flex items-center gap-2">
+            <input
+              id="featured"
+              type="checkbox"
+              checked={form.data.featured}
+              onChange={(e) => form.setData("featured", e.target.checked)}
+            />
+            <label htmlFor="featured" className="text-sm text-zinc-800">
+              Featured on Home
+            </label>
+          </div>
+
+          <Input
+            label="Sort Order (lower first)"
+            type="number"
+            value={String(form.data.sort_order)}
+            onChange={(e) => form.setData("sort_order", Number(e.target.value || 0))}
+          />
+
+          <div className="flex items-center gap-2">
+            <input
+              id="published"
+              type="checkbox"
+              checked={Boolean(form.data.published_at)}
+              onChange={(e) => togglePublished(e.target.checked)}
+            />
+            <label htmlFor="published" className="text-sm text-zinc-800">
+              Published
+            </label>
+          </div>
+
 
           <Button type="submit" loading={form.processing}>Save</Button>
         </form>
