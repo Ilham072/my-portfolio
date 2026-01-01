@@ -22,7 +22,7 @@ class ArticleStoreRequest extends FormRequest
 
             'cover_image_path' => ['nullable','string','max:255'],
             'reading_time_minutes' => ['nullable','integer','min:1','max:120'],
-            'featured' => ['boolean'],
+            'featured' => ['sometimes','boolean'],
             'published_at' => ['nullable','date'],
         ];
     }

@@ -33,8 +33,15 @@ class ArticleController extends Controller
     public function store(ArticleStoreRequest $request)
     {
         $data = $request->validated();
+
         $data['user_id'] = $request->user()->id;
         $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+        $data['featured'] = (bool) ($data['featured'] ?? false);
+
+        // safety: if frontend ever sends empty string
+        if (empty($data['published_at'])) {
+            $data['published_at'] = null;
+        }
 
         Article::create($data);
 
@@ -51,7 +58,13 @@ class ArticleController extends Controller
     public function update(ArticleUpdateRequest $request, Article $article)
     {
         $data = $request->validated();
+
         $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+        $data['featured'] = (bool) ($data['featured'] ?? false);
+
+        if (empty($data['published_at'])) {
+            $data['published_at'] = null;
+        }
 
         $article->update($data);
 

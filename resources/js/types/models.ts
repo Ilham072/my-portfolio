@@ -44,12 +44,20 @@ export type Experience = {
 
 export type Article = {
   id: number;
+  user_id: number;
+
   title: string;
   slug: string;
   excerpt: string | null;
-  body?: string;
+  body: string;
+
   cover_image_path: string | null;
   reading_time_minutes: number | null;
-  featured?: boolean;
+
+  featured: boolean;
   published_at: string | null;
+
+  created_at?: string;
+  updated_at?: string;
 };
+

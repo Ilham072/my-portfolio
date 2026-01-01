@@ -13,13 +13,12 @@ type FormData = {
   slug: string;
   excerpt: string;
   body: string;
+
   cover_image_path: string;
-  project_url: string;
-  repository_url: string;
-  tech_stack: string; // comma separated UI
+  reading_time_minutes: string; // input UI (string) -> number|null saat submit
+
   featured: boolean;
-  sort_order: number;
-  published_at: string;
+  published_at: string; // ISO string atau "" (nanti jadi null)
 };
 
 export default function Create() {
@@ -29,47 +28,69 @@ export default function Create() {
       slug: "",
       excerpt: "",
       body: "",
+
       cover_image_path: "",
-      project_url: "",
-      repository_url: "",
-      tech_stack: "",
+      reading_time_minutes: "",
+
       featured: false,
-      sort_order: 0,
       published_at: "",
     },
     (d) => {
       const errors: Record<string, string> = {};
-      const r = required(d.title, "Title is required.");
-      if (r) errors.title = r;
 
-      const m = maxLen(d.excerpt, 280, "Excerpt max 280 chars.");
-      if (m) errors.excerpt = m;
+      const t = required(d.title, "Title is required.");
+      if (t) errors.title = t;
+
+      const e = maxLen(d.excerpt, 280, "Excerpt max 280 chars.");
+      if (e) errors.excerpt = e;
+
+      const b = required(d.body, "Body is required.");
+      if (b) errors.body = b;
+
+      // reading_time_minutes optional, tapi kalau diisi harus angka >= 1
+      if (d.reading_time_minutes.trim()) {
+        const n = Number(d.reading_time_minutes);
+        if (!Number.isFinite(n) || n < 1) {
+          errors.reading_time_minutes = "Reading time must be a number >= 1.";
+        }
+      }
 
       return errors as never;
     }
   );
 
+  const togglePublished = (checked: boolean) => {
+    // published_at disimpan sebagai ISO agar backend bisa parse "date"
+    form.setData("published_at", checked ? new Date().toISOString() : "");
+  };
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    submitValidated(() => {
-      const tech = form.data.tech_stack
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
 
+    submitValidated(() => {
+      // set slug jika kosong (sebelum transform submit)
       if (!form.data.slug && form.data.title) {
         form.setData("slug", toSlug(form.data.title));
       }
 
+      form.transform((data) => ({
+        title: data.title.trim(),
+        slug: data.slug.trim() || null,
+        excerpt: data.excerpt.trim() || null,
+        body: data.body,
+
+        cover_image_path: data.cover_image_path.trim() || null,
+        reading_time_minutes: data.reading_time_minutes.trim()
+          ? Number(data.reading_time_minutes)
+          : null,
+
+        featured: Boolean(data.featured),
+        published_at: data.published_at ? data.published_at : null,
+      }));
+
       form.post("/admin/articles", {
         preserveScroll: true,
-        transform: (data) => ({
-          ...data,
-          tech_stack: tech,
-          sort_order: Number(data.sort_order || 0),
-          featured: Boolean(data.featured),
-          published_at: data.published_at ? new Date(data.published_at).toISOString() : null,
-        }),
+        onFinish: () => form.transform((d) => d),
       });
     });
   };
@@ -77,21 +98,83 @@ export default function Create() {
   return (
     <AdminLayout>
       <SeoHead title="Admin - Create Article" />
+
       <div className="rounded-2xl border border-zinc-200 bg-white p-6">
         <h1 className="text-xl font-semibold">Create Article</h1>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <Input label="Title" value={form.data.title} onChange={(e) => form.setData("title", e.target.value)} error={form.errors.title} />
-          <Input label="Slug (optional)" value={form.data.slug} onChange={(e) => form.setData("slug", e.target.value)} error={form.errors.slug} />
-          <Textarea label="Excerpt" value={form.data.excerpt} onChange={(e) => form.setData("excerpt", e.target.value)} error={form.errors.excerpt} />
-          <Textarea label="Body" value={form.data.body} onChange={(e) => form.setData("body", e.target.value)} error={form.errors.body} />
+          <Input
+            label="Title"
+            value={form.data.title}
+            onChange={(e) => form.setData("title", e.target.value)}
+            error={form.errors.title}
+          />
 
-          <Input label="Cover Image Path" value={form.data.cover_image_path} onChange={(e) => form.setData("cover_image_path", e.target.value)} />
-          <Input label="Project URL" value={form.data.project_url} onChange={(e) => form.setData("project_url", e.target.value)} />
-          <Input label="Repository URL" value={form.data.repository_url} onChange={(e) => form.setData("repository_url", e.target.value)} />
-          <Input label="Tech Stack (comma separated)" value={form.data.tech_stack} onChange={(e) => form.setData("tech_stack", e.target.value)} />
+          <Input
+            label="Slug (optional)"
+            value={form.data.slug}
+            onChange={(e) => form.setData("slug", e.target.value)}
+            error={form.errors.slug}
+            hint="If empty, it will be generated from the title."
+          />
 
-          <Button type="submit" loading={form.processing}>Save</Button>
+          <Textarea
+            label="Excerpt (optional)"
+            value={form.data.excerpt}
+            onChange={(e) => form.setData("excerpt", e.target.value)}
+            error={form.errors.excerpt}
+          />
+
+          <Textarea
+            label="Body"
+            value={form.data.body}
+            onChange={(e) => form.setData("body", e.target.value)}
+            error={form.errors.body}
+          />
+
+          <Input
+            label="Cover Image Path (optional)"
+            value={form.data.cover_image_path}
+            onChange={(e) => form.setData("cover_image_path", e.target.value)}
+            error={form.errors.cover_image_path}
+          />
+
+          <Input
+            label="Reading Time Minutes (optional)"
+            type="number"
+            value={form.data.reading_time_minutes}
+            onChange={(e) => form.setData("reading_time_minutes", e.target.value)}
+            error={form.errors.reading_time_minutes}
+            hint="Example: 5"
+          />
+
+          <div className="flex items-center gap-2">
+            <input
+              id="featured"
+              type="checkbox"
+              checked={form.data.featured}
+              onChange={(e) => form.setData("featured", e.target.checked)}
+            />
+            <label htmlFor="featured" className="text-sm text-zinc-800">
+              Featured
+            </label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="published"
+              type="checkbox"
+              checked={Boolean(form.data.published_at)}
+              onChange={(e) => togglePublished(e.target.checked)}
+            />
+            <label htmlFor="published" className="text-sm text-zinc-800">
+              Published
+            </label>
+          </div>
+
+          <Button type="submit" loading={form.processing}>
+            Save
+          </Button>
         </form>
       </div>
     </AdminLayout>
