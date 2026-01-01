@@ -19,8 +19,8 @@ class ExperienceUpdateRequest extends FormRequest
             'location' => ['nullable','string','max:120'],
 
             'start_date' => ['required','date'],
-            'end_date' => ['nullable','date'],
-            'is_current' => ['boolean'],
+            'is_current' => ['sometimes','boolean'],
+            'end_date' => ['nullable','date','after_or_equal:start_date','prohibited_if:is_current,1'],
 
             'description' => ['nullable','string','max:10000'],
             'sort_order' => ['nullable','integer','min:0','max:1000000'],

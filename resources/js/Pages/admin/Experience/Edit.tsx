@@ -11,61 +11,90 @@ import { required, maxLen } from "@/utils/validators";
 type Props = { item: Experience };
 
 type FormData = {
-  title: string;
-  slug: string;
-  excerpt: string;
-  body: string;
-  cover_image_path: string;
-  project_url: string;
-  repository_url: string;
-  tech_stack: string;
-  featured: boolean;
+  company: string;
+  role: string;
+  location: string;
+  start_date: string; // YYYY-MM-DD
+  end_date: string;   // YYYY-MM-DD atau ""
+  is_current: boolean;
+  description: string;
   sort_order: number;
-  published_at: string;
 };
+
+// IMPORTANT: avoid `[0]` because TS treats it as `string | undefined`
+function toDateInputValue(v: string | null | undefined): string {
+  const s = v ?? "";
+  if (!s) return "";
+
+  if (s.includes("T")) {
+    const [datePart] = s.split("T");
+    return datePart ?? "";
+  }
+
+  return s;
+}
 
 export default function Edit({ item }: Props) {
   const { form, submitValidated } = useValidatedForm<FormData>(
     {
-      title: item.title,
-      slug: item.slug,
-      excerpt: item.excerpt ?? "",
-      body: item.body ?? "",
-      cover_image_path: item.cover_image_path ?? "",
-      project_url: item.project_url ?? "",
-      repository_url: item.repository_url ?? "",
-      tech_stack: item.tech_stack?.join(", ") ?? "",
-      featured: item.featured ?? false,
+      company: item.company ?? "",
+      role: item.role ?? "",
+      location: item.location ?? "",
+      start_date: toDateInputValue(item.start_date),
+      end_date: toDateInputValue(item.end_date),
+      is_current: Boolean(item.is_current),
+      description: item.description ?? "",
       sort_order: item.sort_order ?? 0,
-      published_at: item.published_at ?? "",
     },
     (d) => {
       const errors: Record<string, string> = {};
-      const r = required(d.title, "Title is required.");
-      if (r) errors.title = r;
-      const m = maxLen(d.excerpt, 280, "Excerpt max 280 chars.");
-      if (m) errors.excerpt = m;
+
+      const c = required(d.company, "Company is required.");
+      if (c) errors.company = c;
+
+      const r = required(d.role, "Role is required.");
+      if (r) errors.role = r;
+
+      const sd = required(d.start_date, "Start date is required.");
+      if (sd) errors.start_date = sd;
+
+      const desc = maxLen(d.description, 10000, "Description max 10000 chars.");
+      if (desc) errors.description = desc;
+
+      if (d.is_current && d.end_date) {
+        errors.end_date = "End date must be empty when current position is checked.";
+      }
+      if (!d.is_current && d.end_date && d.start_date && d.end_date < d.start_date) {
+        errors.end_date = "End date must be after or equal to start date.";
+      }
+
       return errors as never;
     }
   );
 
+  const toggleCurrent = (checked: boolean) => {
+    form.setData("is_current", checked);
+    if (checked) form.setData("end_date", "");
+  };
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     submitValidated(() => {
-      const tech = form.data.tech_stack
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+      form.transform((data) => ({
+        company: data.company.trim(),
+        role: data.role.trim(),
+        location: data.location.trim() || null,
+        start_date: data.start_date,
+        end_date: data.is_current ? null : (data.end_date ? data.end_date : null),
+        is_current: Boolean(data.is_current),
+        description: data.description.trim() || null,
+        sort_order: Number(data.sort_order || 0),
+      }));
 
       form.put(`/admin/experiences/${item.id}`, {
         preserveScroll: true,
-        transform: (data) => ({
-          ...data,
-          tech_stack: tech,
-          sort_order: Number(data.sort_order || 0),
-          featured: Boolean(data.featured),
-          published_at: data.published_at ? new Date(data.published_at).toISOString() : null,
-        }),
+        onFinish: () => form.transform((d) => d),
       });
     });
   };
@@ -73,21 +102,80 @@ export default function Edit({ item }: Props) {
   return (
     <AdminLayout>
       <SeoHead title="Admin - Edit Experience" />
+
       <div className="rounded-2xl border border-zinc-200 bg-white p-6">
         <h1 className="text-xl font-semibold">Edit Experience</h1>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <Input label="Title" value={form.data.title} onChange={(e) => form.setData("title", e.target.value)} error={form.errors.title} />
-          <Input label="Slug" value={form.data.slug} onChange={(e) => form.setData("slug", e.target.value)} error={form.errors.slug} />
-          <Textarea label="Excerpt" value={form.data.excerpt} onChange={(e) => form.setData("excerpt", e.target.value)} error={form.errors.excerpt} />
-          <Textarea label="Body" value={form.data.body} onChange={(e) => form.setData("body", e.target.value)} error={form.errors.body} />
+          <Input
+            label="Company"
+            value={form.data.company}
+            onChange={(e) => form.setData("company", e.target.value)}
+            error={form.errors.company}
+          />
 
-          <Input label="Cover Image Path" value={form.data.cover_image_path} onChange={(e) => form.setData("cover_image_path", e.target.value)} />
-          <Input label="Project URL" value={form.data.project_url} onChange={(e) => form.setData("project_url", e.target.value)} />
-          <Input label="Repository URL" value={form.data.repository_url} onChange={(e) => form.setData("repository_url", e.target.value)} />
-          <Input label="Tech Stack (comma separated)" value={form.data.tech_stack} onChange={(e) => form.setData("tech_stack", e.target.value)} />
+          <Input
+            label="Role"
+            value={form.data.role}
+            onChange={(e) => form.setData("role", e.target.value)}
+            error={form.errors.role}
+          />
 
-          <Button type="submit" loading={form.processing}>Save</Button>
+          <Input
+            label="Location (optional)"
+            value={form.data.location}
+            onChange={(e) => form.setData("location", e.target.value)}
+            error={form.errors.location}
+          />
+
+          <Input
+            label="Start Date"
+            type="date"
+            value={form.data.start_date}
+            onChange={(e) => form.setData("start_date", e.target.value)}
+            error={form.errors.start_date}
+          />
+
+          <div className="flex items-center gap-2">
+            <input
+              id="is_current"
+              type="checkbox"
+              checked={form.data.is_current}
+              onChange={(e) => toggleCurrent(e.target.checked)}
+            />
+            <label htmlFor="is_current" className="text-sm text-zinc-800">
+              Current position
+            </label>
+          </div>
+
+          <Input
+            label="End Date (optional)"
+            type="date"
+            value={form.data.end_date}
+            onChange={(e) => form.setData("end_date", e.target.value)}
+            error={form.errors.end_date}
+            disabled={form.data.is_current}
+            hint={form.data.is_current ? "Disabled because current position is checked." : undefined}
+          />
+
+          <Textarea
+            label="Description (optional)"
+            value={form.data.description}
+            onChange={(e) => form.setData("description", e.target.value)}
+            error={form.errors.description}
+          />
+
+          <Input
+            label="Sort Order (lower first)"
+            type="number"
+            value={String(form.data.sort_order)}
+            onChange={(e) => form.setData("sort_order", Number(e.target.value || 0))}
+            error={form.errors.sort_order}
+          />
+
+          <Button type="submit" loading={form.processing}>
+            Save
+          </Button>
         </form>
       </div>
     </AdminLayout>

@@ -31,8 +31,19 @@ class ExperienceController extends Controller
 
     public function store(ExperienceStoreRequest $request)
     {
-        Experience::create($request->validated());
-        return redirect()->route('admin.experiences.index')->with('success', 'Experience created.');
+        $data = $request->validated();
+
+        $data['is_current'] = (bool) ($data['is_current'] ?? false);
+
+        if ($data['is_current']) {
+            $data['end_date'] = null;
+        }
+
+        Experience::create($data);
+
+        return redirect()
+            ->route('admin.experiences.index')
+            ->with('success', 'Experience created.');
     }
 
     public function edit(Experience $experience)
@@ -44,8 +55,19 @@ class ExperienceController extends Controller
 
     public function update(ExperienceUpdateRequest $request, Experience $experience)
     {
-        $experience->update($request->validated());
-        return redirect()->route('admin.experiences.index')->with('success', 'Experience updated.');
+        $data = $request->validated();
+
+        $data['is_current'] = (bool) ($data['is_current'] ?? false);
+
+        if ($data['is_current']) {
+            $data['end_date'] = null;
+        }
+
+        $experience->update($data);
+
+        return redirect()
+            ->route('admin.experiences.index')
+            ->with('success', 'Experience updated.');
     }
 
     public function destroy(Experience $experience)
