@@ -3,11 +3,15 @@ import PublicNavbar from "./PublicNavbar";
 
 export default function PublicLayout({ children }: PropsWithChildren) {
   return (
-    <div className="min-h-screen bg-white text-zinc-900">
+    <div className="min-h-screen bg-bg text-fg">
       <PublicNavbar />
-      <main className="mx-auto w-full max-w-6xl px-4 py-8">{children}</main>
-      <footer className="border-t border-zinc-200">
-        <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-zinc-500">
+
+      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        {children}
+      </main>
+
+      <footer className="border-t border-border">
+        <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-muted sm:px-6 lg:px-8">
           © {new Date().getFullYear()} Portfolio
         </div>
       </footer>
