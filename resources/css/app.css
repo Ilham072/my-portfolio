@@ -4,15 +4,15 @@
 
 :root {
   --bg: 255 255 255;
-  --fg: 24 24 27;          /* zinc-900 */
-  --muted: 82 82 91;       /* zinc-600 */
-  --border: 228 228 231;   /* zinc-200 */
+  --fg: 9 9 11;          
+  --muted: 113 113 122;       
+  --border: 228 228 231;   
 
-  --primary: 17 24 39;     /* slate-900 */
+  --primary: 37 99 235;     /* blue-600*/
   --primary-fg: 255 255 255;
 
-  --accent: 99 102 241;    /* indigo-500 */
-  --accent-fg: 255 255 255;
+  --accent: 219 234 254;    /* blue-100*/
+  --accent-fg: 30 64 175;   /* blue-800*/
 }
 
 .dark {
