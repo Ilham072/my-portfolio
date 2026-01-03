@@ -5,6 +5,7 @@ import type { Article, Portfolio, UserProfile } from "@/types/models";
 import { Badge } from "@/components/ui/Badge";
 import { routes } from "@/utils/routes";
 import { Link } from "@inertiajs/react";
+import Hero from "@/components/public/Hero";
 
 type Props = {
   owner: UserProfile | null;
@@ -32,42 +33,7 @@ export default function Home({ owner, featuredProjects, latestArticles }: Props)
         description={owner?.headline ?? "Professional portfolio website"}
       />
 
-      {/* HERO */}
-      <section className="space-y-4">
-        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-bg px-3 py-1 text-xs text-muted">
-          <span className="h-2 w-2 rounded-full bg-accent" />
-          Available for opportunities
-        </div>
-
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          {name}
-        </h1>
-
-        <p className="max-w-2xl text-base text-muted sm:text-lg">
-          {headline}
-        </p>
-
-        {bio ? (
-          <p className="max-w-3xl text-sm leading-relaxed text-fg/90 sm:text-base">
-            {bio}
-          </p>
-        ) : null}
-
-        <div className="flex flex-wrap gap-3 pt-2">
-          <Link
-            href={routes.public.portfolioIndex}
-            className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-fg hover:opacity-90"
-          >
-            View Portfolio
-          </Link>
-          <Link
-            href={routes.public.contact}
-            className="rounded-xl border border-border bg-bg px-4 py-2 text-sm font-medium text-fg hover:bg-zinc-100 dark:hover:bg-zinc-900"
-          >
-            Contact
-          </Link>
-        </div>
-      </section>
+      <Hero owner={owner} />
 
       {/* FEATURED PROJECTS */}
       <section className="mt-12">

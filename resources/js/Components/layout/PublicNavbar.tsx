@@ -12,11 +12,17 @@ const nav = [
 ];
 
 function isActivePath(currentPath: string, href: string): boolean {
-  // "/" harus exact
   if (href === "/") return currentPath === "/";
-
-  // match prefix (mis. /portfolio dan /portfolio/slug)
   return currentPath === href || currentPath.startsWith(href + "/");
+}
+
+function navLinkClass(active: boolean) {
+  return [
+    "rounded-xl px-3 py-2 transition-colors",
+    active
+      ? "bg-accent text-accent-fg"
+      : "text-muted hover:bg-accent/60 hover:text-fg",
+  ].join(" ");
 }
 
 export default function PublicNavbar() {
@@ -24,7 +30,6 @@ export default function PublicNavbar() {
   const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
-    // close menu setiap route berubah
     setOpen(false);
   }, [url]);
 
@@ -35,28 +40,14 @@ export default function PublicNavbar() {
           Portfolio
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden items-center gap-1 text-sm md:flex">
-          {nav.map((i) => {
-            const active = isActivePath(url, i.href);
-            return (
-              <Link
-                key={i.href}
-                href={i.href}
-                className={[
-                  "rounded-xl px-3 py-2 transition",
-                  active
-                    ? "bg-zinc-100 text-fg dark:bg-zinc-900"
-                    : "text-muted hover:bg-zinc-100 hover:text-fg dark:hover:bg-zinc-900",
-                ].join(" ")}
-              >
-                {i.label}
-              </Link>
-            );
-          })}
+          {nav.map((i) => (
+            <Link key={i.href} href={i.href} className={navLinkClass(isActivePath(url, i.href))}>
+              {i.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Mobile toggle */}
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-xl border border-border px-3 py-2 text-sm text-fg md:hidden"
@@ -68,28 +59,15 @@ export default function PublicNavbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {open ? (
         <div className="border-t border-border bg-bg md:hidden">
           <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
             <nav className="grid gap-1 text-sm">
-              {nav.map((i) => {
-                const active = isActivePath(url, i.href);
-                return (
-                  <Link
-                    key={i.href}
-                    href={i.href}
-                    className={[
-                      "rounded-xl px-3 py-2 transition",
-                      active
-                        ? "bg-zinc-100 text-fg dark:bg-zinc-900"
-                        : "text-muted hover:bg-zinc-100 hover:text-fg dark:hover:bg-zinc-900",
-                    ].join(" ")}
-                  >
-                    {i.label}
-                  </Link>
-                );
-              })}
+              {nav.map((i) => (
+                <Link key={i.href} href={i.href} className={navLinkClass(isActivePath(url, i.href))}>
+                  {i.label}
+                </Link>
+              ))}
             </nav>
           </div>
         </div>
