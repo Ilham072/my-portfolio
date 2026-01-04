@@ -13,6 +13,9 @@
 
   --accent: 219 234 254;    /* blue-100*/
   --accent-fg: 30 64 175;   /* blue-800*/
+
+  --highlight: 245 158 11;        /* amber-500 */
+  --highlight-fg: 24 24 27;       /* zinc-900 (teks di atas amber) */
 }
 
 .dark {
@@ -26,4 +29,7 @@
 
   --accent: 129 140 248;   /* indigo-400 */
   --accent-fg: 9 9 11;
+
+  --highlight: 251 191 36;        /* amber-400 (lebih terang di dark) */
+  --highlight-fg: 9 9 11;
 }
