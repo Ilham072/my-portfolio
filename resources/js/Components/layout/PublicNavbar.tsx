@@ -24,7 +24,7 @@ export default function PublicNavbar() {
 
   return (
     <header className="sticky top-0 z-50 border-border bg-bg/80 backdrop-blur">
-      <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-full px-4 py-4 sm:px-6 lg:px-24">
         <div className="rounded-full border border-border bg-primary shadow-sm">
           <div className="flex items-center justify-between gap-3 px-3 py-2">
             {/* Brand */}
@@ -33,7 +33,7 @@ export default function PublicNavbar() {
               className="flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-fg"
               aria-label="Go to home"
             >
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-highlight text-primary-fg">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-highlight text-primary-fg ">
                 IF
               </span>
               <span className="hidden tracking-tight sm:inline text-bg">Ilham Furqan</span>

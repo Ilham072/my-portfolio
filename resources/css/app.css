@@ -1,6 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 
 :root {
   --bg: 255 255 255;
@@ -31,5 +36,5 @@
   --accent-fg: 9 9 11;
 
   --highlight: 251 191 36;        /* amber-400 (lebih terang di dark) */
-  --highlight-fg: 9 9 11;
+  --highlight-fg: 9 9 11; 
 }
