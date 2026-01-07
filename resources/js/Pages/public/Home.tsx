@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/Badge";
 import { routes } from "@/utils/routes";
 import { Link } from "@inertiajs/react";
 import Hero from "@/components/public/Hero";
+import Services from "@/components/public/Services";
+import Container from "@/components/common/Container";
 
 type Props = {
   owner: UserProfile | null;
@@ -34,6 +36,8 @@ export default function Home({ owner, featuredProjects, latestArticles }: Props)
       />
 
       <Hero owner={owner} />
+    
+      <Services />
 
       {/* FEATURED PROJECTS */}
       <section className="mt-12">
